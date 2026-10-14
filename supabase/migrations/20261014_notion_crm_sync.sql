@@ -56,13 +56,14 @@ alter table public.projects
   add column if not exists project_value_eur numeric,
   add column if not exists notion_synced_at timestamptz;
 
-create unique index if not exists opportunities_notion_page_id_uq
-  on public.opportunities (notion_page_id)
-  where notion_page_id is not null;
+-- A regular UNIQUE index permits multiple NULLs and can be targeted by PostgREST upsert.
+drop index if exists public.opportunities_notion_page_id_uq;
+create unique index opportunities_notion_page_id_uq
+  on public.opportunities (notion_page_id);
 
-create unique index if not exists projects_notion_page_id_uq
-  on public.projects (notion_page_id)
-  where notion_page_id is not null;
+drop index if exists public.projects_notion_page_id_uq;
+create unique index projects_notion_page_id_uq
+  on public.projects (notion_page_id);
 
 create index if not exists contacts_notion_company_page_id_idx
   on public.contacts (notion_company_page_id);
