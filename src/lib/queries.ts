@@ -8,6 +8,10 @@ function unwrap<T>(data: T | null, error: { message?: string } | null): T {
   return data
 }
 
+function isDemoNote(value?: string | null) {
+  return value?.trim().toUpperCase().startsWith('DEMO') ?? false
+}
+
 function toUiShift(row: Shift): Shift {
   const statusMap: Record<string, string> = {
     planned: 'Suunniteltu',
@@ -19,12 +23,14 @@ function toUiShift(row: Shift): Shift {
 
 export async function getOpportunities() {
   const { data, error } = await supabase.from('opportunities').select('*').order('next_action_at', { ascending: true, nullsFirst: false })
-  return unwrap((data ?? []) as Opportunity[], error)
+  const rows = unwrap((data ?? []) as Opportunity[], error)
+  return rows.filter((row) => !isDemoNote(row.notes))
 }
 
 export async function getProjects() {
   const { data, error } = await supabase.from('projects').select('*').order('due_date', { ascending: true, nullsFirst: false })
-  return unwrap((data ?? []) as Project[], error)
+  const rows = unwrap((data ?? []) as Project[], error)
+  return rows.filter((row) => !isDemoNote(row.notes))
 }
 
 export async function getProject(id: string) {
