@@ -1,5 +1,5 @@
 -- Hanna preparation workspace permissions.
--- Incomplete work items stay hidden from Hanna. Jami and Kirsi can prepare
+-- Incomplete work items stay hidden from Hanna. Jami can prepare
 -- drafts and promote them only after the existing ready_for_hanna gate passes.
 
 create or replace function public.can_prepare_hanna_work(_user_id uuid)
@@ -13,7 +13,7 @@ as $$
     select 1
     from public.user_roles ur
     where ur.user_id = _user_id
-      and ur.role in ('jami'::app_role, 'kirsi'::app_role)
+      and ur.role = 'jami'::app_role
   );
 $$;
 

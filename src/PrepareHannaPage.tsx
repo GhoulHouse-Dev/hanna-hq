@@ -20,7 +20,7 @@ import { supabase, supabaseConfigured } from './lib/supabase'
 import './task-first.css'
 import './prepare-hanna.css'
 
-type Role = 'hanna' | 'jami' | 'kirsi'
+type Role = 'hanna' | 'jami'
 type PrepSource = 'opportunity' | 'project' | 'admin_task'
 
 type RawOpportunity = {
@@ -311,7 +311,7 @@ export default function PrepareHannaPage() {
     return () => { active = false }
   }, [session])
 
-  const canPrepare = role === 'jami' || role === 'kirsi'
+  const canPrepare = role === 'jami'
 
   useEffect(() => {
     if (!canPrepare) return
@@ -409,7 +409,7 @@ export default function PrepareHannaPage() {
         <div className="ph-access-card">
           <ClipboardCheck size={34} />
           <span className="ph-eyebrow">Valmistele Hannalle</span>
-          <h1>Tämä näkymä on Jamille ja Kirsille.</h1>
+          <h1>Tämä näkymä on Jamille.</h1>
           <p>Hannan käyttäjä näkee vain valmiiksi aktivoidut tehtävät. Keskeneräinen valmistelu ei kuulu Hannan työjonoon.</p>
           {error ? <div className="ph-message error"><AlertTriangle size={16} /> {error}</div> : null}
           <Link to="/today" className="ph-primary"><ArrowLeft size={17} /> Takaisin Tänään-näkymään</Link>
@@ -423,7 +423,7 @@ export default function PrepareHannaPage() {
       <div className="ph-page">
         <header className="ph-header">
           <div>
-            <span className="ph-eyebrow">JAMI / KIRSI</span>
+            <span className="ph-eyebrow">JAMI</span>
             <h1>Valmistele Hannalle</h1>
             <p>Täytä neljä asiaa. Tehtävä pysyy piilossa Hannalta, kunnes painat <strong>Siirrä Hannan työjonoon</strong>.</p>
           </div>

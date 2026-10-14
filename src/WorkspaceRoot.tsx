@@ -23,7 +23,7 @@ export default function WorkspaceRoot() {
         return
       }
       const { data } = await supabase.from('user_roles').select('role').eq('user_id', userId).maybeSingle()
-      if (active) setCanPrepare(data?.role === 'jami' || data?.role === 'kirsi')
+      if (active) setCanPrepare(data?.role === 'jami')
     }
 
     void resolveRole()
