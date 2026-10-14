@@ -1,0 +1,47 @@
+import { useEffect, useState } from 'react'
+import { ClipboardCheck } from 'lucide-react'
+import { Link, useLocation } from 'react-router-dom'
+import PrepareHannaPage from './PrepareHannaPage'
+import TaskFirstRoot from './TaskFirstRoot'
+import { supabase, supabaseConfigured } from './lib/supabase'
+import './prepare-hanna.css'
+import './workspace-root.css'
+
+export default function WorkspaceRoot() {
+  const location = useLocation()
+  const [canPrepare, setCanPrepare] = useState(false)
+
+  useEffect(() => {
+    if (!supabaseConfigured) return
+    let active = true
+
+    async function resolveRole() {
+      const { data: sessionData } = await supabase.auth.getSession()
+      const userId = sessionData.session?.user.id
+      if (!userId) {
+        if (active) setCanPrepare(false)
+        return
+      }
+      const { data } = await supabase.from('user_roles').select('role').eq('user_id', userId).maybeSingle()
+      if (active) setCanPrepare(data?.role === 'jami' || data?.role === 'kirsi')
+    }
+
+    void resolveRole()
+    const { data: authListener } = supabase.auth.onAuthStateChange(() => void resolveRole())
+    return () => {
+      active = false
+      authListener.subscription.unsubscribe()
+    }
+  }, [])
+
+  if (location.pathname === '/prepare-hanna') return <PrepareHannaPage />
+
+  return (
+    <>
+      <TaskFirstRoot />
+      {canPrepare && location.pathname === '/today' ? (
+        <Link to="/prepare-hanna" className="ph-launcher"><ClipboardCheck size={17} /> Valmistele Hannalle</Link>
+      ) : null}
+    </>
+  )
+}
