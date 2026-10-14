@@ -14,8 +14,8 @@ begin
   end if;
 
   if not exists (
-    select 1 from public.user_roles
-    where user_id = v_user and role::text = 'hanna'
+    select 1 from public.user_roles ur
+    where ur.user_id = v_user and ur.role::text = 'hanna'
   ) then
     raise exception 'Vain Hanna voi tallentaa työvuorosuunnitelman';
   end if;
@@ -47,11 +47,11 @@ begin
     raise exception 'Kahden viikon suunnitelmassa pitää olla vähintään 15 tuntia';
   end if;
 
-  delete from public.shifts
-  where user_id = v_user
-    and date between _period_start and v_period_end
-    and status = 'planned'
-    and started_at is null;
+  delete from public.shifts s
+  where s.user_id = v_user
+    and s.date between _period_start and v_period_end
+    and s.status = 'planned'
+    and s.started_at is null;
 
   insert into public.shifts (user_id, date, planned_hours, focus, status, break_minutes)
   select
