@@ -24,51 +24,22 @@ import './task-first.css'
 type Priority = 'P0' | 'P1' | 'P2' | 'P3'
 type Source = 'opportunity' | 'project' | 'admin'
 
-interface OpportunityRow {
+interface WorkQueueRow {
   id: string
-  company_name: string
-  stage: string
-  priority: string | null
-  next_action: string | null
-  next_action_at: string | null
-  task_instruction: string | null
-  action_label: string | null
-  action_url: string | null
-  materials_url: string | null
-  details_url: string | null
-  blocked_reason: string | null
-}
-
-interface ProjectRow {
-  id: string
-  company_name: string
-  status: string
-  health: string | null
-  priority: string | null
-  due_date: string | null
-  next_action: string | null
-  task_instruction: string | null
-  action_label: string | null
-  action_url: string | null
-  materials_url: string | null
-  details_url: string | null
-  blocked_reason: string | null
-}
-
-interface AdminRow {
-  id: string
+  source: Source
+  source_label: string
   title: string
-  status: string
-  owner_text: string | null
+  state: string
   priority: string | null
-  target_date: string | null
-  next_action: string | null
-  task_instruction: string | null
+  work_date: string | null
+  instruction: string | null
   action_label: string | null
   action_url: string | null
   materials_url: string | null
   details_url: string | null
   blocked_reason: string | null
+  priority_rank: number
+  urgency_rank: number
 }
 
 interface WorkItem {
@@ -89,8 +60,6 @@ interface WorkItem {
 }
 
 const priorityRank: Record<Priority, number> = { P0: 0, P1: 1, P2: 2, P3: 3 }
-const activeProjectStatuses = ['Onboarding', 'Active', 'Waiting client', 'QA', 'On hold']
-const openAdminStatuses = ['Tarkista', 'Kesken', 'Odottaa']
 
 function normalizePriority(value?: string | null, fallback: Priority = 'P2'): Priority {
   return value === 'P0' || value === 'P1' || value === 'P2' || value === 'P3' ? value : fallback
@@ -108,7 +77,7 @@ function compareItems(a: WorkItem, b: WorkItem) {
   if (priority !== 0) return priority
   const urgency = urgencyRank(a.date) - urgencyRank(b.date)
   if (urgency !== 0) return urgency
-  return (a.date ?? '9999-12-31').localeCompare(b.date ?? '9999-12-31')
+  return (a.date ?? '9999-12-31').localeCompare(b.date ?? '9999-12-31') || a.title.localeCompare(b.title, 'fi')
 }
 
 function urgencyLabel(date: string | null) {
@@ -116,6 +85,18 @@ function urgencyLabel(date: string | null) {
   if (isOverdue(date)) return 'Myöhässä'
   if (isToday(date)) return 'Tänään'
   return formatDate(date)
+}
+
+function fallbackDetails(row: WorkQueueRow) {
+  if (row.source === 'project') return `/clients/${row.id}`
+  if (row.source === 'opportunity') return '/follow-ups'
+  return '/admin'
+}
+
+function fallbackActionLabel(source: Source) {
+  if (source === 'project') return 'Avaa projekti'
+  if (source === 'opportunity') return 'Avaa follow-up'
+  return 'Avaa hallintotehtävä'
 }
 
 function SmartLink({ href, className, children }: { href: string; className?: string; children: React.ReactNode }) {
@@ -198,95 +179,53 @@ function TaskFirstDashboard({ session }: { session: Session }) {
 
   useEffect(() => {
     let active = true
+
     async function load() {
       setLoading(true)
       setError('')
-      const [oppResult, projectResult, adminResult] = await Promise.all([
-        supabase.from('opportunities').select('*'),
-        supabase.from('projects').select('*'),
-        supabase.from('admin_tasks').select('*'),
-      ])
-      const firstError = oppResult.error || projectResult.error || adminResult.error
-      if (firstError) {
-        if (active) setError(firstError.message)
-        if (active) setLoading(false)
+
+      const { data, error: queueError } = await supabase
+        .from('hanna_work_queue')
+        .select('*')
+        .order('priority_rank', { ascending: true })
+        .order('urgency_rank', { ascending: true })
+        .order('work_date', { ascending: true, nullsFirst: false })
+        .order('title', { ascending: true })
+
+      if (!active) return
+      if (queueError) {
+        setError(queueError.message)
+        setLoading(false)
         return
       }
 
-      const opportunities = (oppResult.data ?? []) as OpportunityRow[]
-      const projects = (projectResult.data ?? []) as ProjectRow[]
-      const admin = (adminResult.data ?? []) as AdminRow[]
-
-      const nextItems: WorkItem[] = []
-
-      opportunities.filter((row) => !['Won', 'Lost'].includes(row.stage)).forEach((row) => {
-        const details = row.details_url || '/follow-ups'
+      const rows = (data ?? []) as WorkQueueRow[]
+      const nextItems = rows.map<WorkItem>((row) => {
+        const details = row.details_url || fallbackDetails(row)
         const action = row.action_url || details
-        nextItems.push({
-          id: `opportunity-${row.id}`,
-          source: 'opportunity',
-          title: row.company_name,
-          sourceLabel: 'Myynti',
-          state: row.stage,
-          priority: normalizePriority(row.priority),
-          date: row.next_action_at,
-          instruction: row.task_instruction || row.next_action || 'Määritä seuraava konkreettinen teko ennen kuin jatkat.',
-          actionLabel: row.action_label || 'Avaa follow-up',
-          actionUrl: action,
-          directActionMissing: !row.action_url,
-          materialsUrl: row.materials_url,
-          detailsUrl: details,
-          blockedReason: row.blocked_reason,
-        })
-      })
 
-      projects.filter((row) => activeProjectStatuses.includes(row.status)).forEach((row) => {
-        const details = row.details_url || `/clients/${row.id}`
-        const action = row.action_url || details
-        nextItems.push({
-          id: `project-${row.id}`,
-          source: 'project',
-          title: row.company_name,
-          sourceLabel: 'Asiakas',
-          state: row.status,
-          priority: normalizePriority(row.priority, 'P2'),
-          date: row.due_date,
-          instruction: row.task_instruction || row.next_action || 'Määritä asiakkaalle seuraava toimitustoimenpide.',
-          actionLabel: row.action_label || 'Avaa projekti',
-          actionUrl: action,
-          directActionMissing: !row.action_url,
-          materialsUrl: row.materials_url,
-          detailsUrl: details,
-          blockedReason: row.blocked_reason,
-        })
-      })
-
-      admin.filter((row) => openAdminStatuses.includes(row.status)).forEach((row) => {
-        const details = row.details_url || '/admin'
-        const action = row.action_url || details
-        nextItems.push({
-          id: `admin-${row.id}`,
-          source: 'admin',
+        return {
+          id: `${row.source}-${row.id}`,
+          source: row.source,
           title: row.title,
-          sourceLabel: 'Hallinto',
-          state: row.owner_text || row.status,
-          priority: normalizePriority(row.priority, 'P3'),
-          date: row.target_date,
-          instruction: row.task_instruction || row.next_action || 'Määritä seuraava tarkistettava asia.',
-          actionLabel: row.action_label || 'Avaa hallintotehtävä',
+          sourceLabel: row.source_label,
+          state: row.state,
+          priority: normalizePriority(row.priority, row.source === 'admin' ? 'P3' : 'P2'),
+          date: row.work_date,
+          instruction: row.instruction || 'Määritä seuraava konkreettinen teko ennen kuin jatkat.',
+          actionLabel: row.action_label || fallbackActionLabel(row.source),
           actionUrl: action,
           directActionMissing: !row.action_url,
           materialsUrl: row.materials_url,
           detailsUrl: details,
           blockedReason: row.blocked_reason,
-        })
+        }
       })
 
-      if (active) {
-        setItems(nextItems.sort(compareItems))
-        setLoading(false)
-      }
+      setItems(nextItems)
+      setLoading(false)
     }
+
     void load()
     return () => { active = false }
   }, [])
