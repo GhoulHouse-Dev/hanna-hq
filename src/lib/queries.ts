@@ -8,6 +8,15 @@ function unwrap<T>(data: T | null, error: { message?: string } | null): T {
   return data
 }
 
+function toUiShift(row: Shift): Shift {
+  const statusMap: Record<string, string> = {
+    planned: 'Suunniteltu',
+    running: 'Käynnissä',
+    done: 'Valmis',
+  }
+  return { ...row, status: statusMap[row.status] ?? row.status }
+}
+
 export async function getOpportunities() {
   const { data, error } = await supabase.from('opportunities').select('*').order('next_action_at', { ascending: true, nullsFirst: false })
   return unwrap((data ?? []) as Opportunity[], error)
@@ -30,7 +39,8 @@ export async function getAdminTasks() {
 
 export async function getShifts() {
   const { data, error } = await supabase.from('shifts').select('*').order('date', { ascending: false }).limit(60)
-  return unwrap((data ?? []) as Shift[], error)
+  const rows = unwrap((data ?? []) as Shift[], error)
+  return rows.map(toUiShift)
 }
 
 export async function getWeeklyMetrics() {
@@ -39,7 +49,13 @@ export async function getWeeklyMetrics() {
 }
 
 export async function updateOpportunity(id: string, patch: Partial<Opportunity>) {
-  const { data, error } = await supabase.from('opportunities').update(patch).eq('id', id).select('*').single()
+  const normalizedPatch = {
+    ...patch,
+    ...(patch.next_action_at !== undefined
+      ? { next_action_at: patch.next_action_at ? patch.next_action_at.slice(0, 10) : null }
+      : {}),
+  }
+  const { data, error } = await supabase.from('opportunities').update(normalizedPatch).eq('id', id).select('*').single()
   return unwrap(data as Opportunity | null, error)
 }
 
@@ -65,10 +81,19 @@ export async function startShift(plannedHours = 3, focus = '') {
   if (!userId) throw new Error('Kirjaudu sisään aloittaaksesi työvuoron')
 
   const today = localDateKey()
-  const { data: existing } = await supabase.from('shifts').select('*').eq('user_id', userId).eq('date', today).maybeSingle()
+  const { data: existing, error: existingError } = await supabase.from('shifts').select('*').eq('user_id', userId).eq('date', today).maybeSingle()
+  if (existingError) throw new Error(existingError.message)
+
   if (existing) {
-    const { data, error } = await supabase.from('shifts').update({ started_at: new Date().toISOString(), status: 'Käynnissä', planned_hours: plannedHours, focus }).eq('id', existing.id).select('*').single()
-    return unwrap(data as Shift | null, error)
+    const { data, error } = await supabase.from('shifts').update({
+      started_at: new Date().toISOString(),
+      ended_at: null,
+      actual_hours: null,
+      status: 'running',
+      planned_hours: plannedHours,
+      focus,
+    }).eq('id', existing.id).select('*').single()
+    return toUiShift(unwrap(data as Shift | null, error))
   }
 
   const { data, error } = await supabase.from('shifts').insert({
@@ -77,10 +102,10 @@ export async function startShift(plannedHours = 3, focus = '') {
     started_at: new Date().toISOString(),
     planned_hours: plannedHours,
     focus,
-    status: 'Käynnissä',
+    status: 'running',
     break_minutes: 0,
   }).select('*').single()
-  return unwrap(data as Shift | null, error)
+  return toUiShift(unwrap(data as Shift | null, error))
 }
 
 export async function endShift(shift: Shift, breakMinutes = shift.break_minutes ?? 0) {
@@ -93,9 +118,9 @@ export async function endShift(shift: Shift, breakMinutes = shift.break_minutes 
     ended_at: endedAt.toISOString(),
     break_minutes: breakMinutes,
     actual_hours: Number(actualHours.toFixed(2)),
-    status: 'Valmis',
+    status: 'done',
   }).eq('id', shift.id).select('*').single()
-  return unwrap(data as Shift | null, error)
+  return toUiShift(unwrap(data as Shift | null, error))
 }
 
 export async function logActivity(input: {
