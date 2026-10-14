@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react'
 import { ClipboardCheck } from 'lucide-react'
 import { Link, useLocation } from 'react-router-dom'
 import PrepareHannaPage from './PrepareHannaPage'
+import ShiftPlannerPage from './ShiftPlannerPage'
 import TaskFirstRoot from './TaskFirstRoot'
 import { supabase, supabaseConfigured } from './lib/supabase'
 import './prepare-hanna.css'
@@ -35,6 +36,7 @@ export default function WorkspaceRoot() {
   }, [])
 
   if (location.pathname === '/prepare-hanna') return <PrepareHannaPage />
+  if (location.pathname === '/shifts') return <ShiftPlannerPage />
 
   return (
     <>
