@@ -47,6 +47,16 @@ begin
     raise exception 'Kahden viikon suunnitelmassa pitää olla vähintään 15 tuntia';
   end if;
 
+  if exists (
+    select 1
+    from public.shifts s
+    where s.user_id = v_user
+      and s.date between _period_start and v_period_end
+      and not (s.status = 'planned' and s.started_at is null)
+  ) then
+    raise exception 'Jaksolla on jo aloitettu tai valmis työvuoro, jota ei voi korvata';
+  end if;
+
   delete from public.shifts s
   where s.user_id = v_user
     and s.date between _period_start and v_period_end
@@ -62,11 +72,7 @@ begin
     'planned',
     0
   from jsonb_array_elements(_entries) e
-  where coalesce((e->>'planned_hours')::numeric, 0) > 0
-  on conflict (user_id, date) do update
-    set planned_hours = excluded.planned_hours,
-        focus = excluded.focus
-  where shifts.status = 'planned' and shifts.started_at is null;
+  where coalesce((e->>'planned_hours')::numeric, 0) > 0;
 
   return query
   select s.date, s.planned_hours, s.focus, s.status
