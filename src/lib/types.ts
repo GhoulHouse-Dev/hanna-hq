@@ -1,4 +1,4 @@
-export type Role = 'hanna' | 'jami' | 'kirsi'
+export type Role = 'hanna' | 'jami'
 export type Priority = 'P0' | 'P1' | 'P2' | 'P3'
 
 export interface Opportunity {
