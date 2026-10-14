@@ -1,6 +1,6 @@
 -- Hanna HQ task readiness gate
 -- A task is invisible to Hanna until it has an explicit instruction,
--- direct action, materials link and details link. Jami/Kirsi can still
+-- direct action, materials link and details link. Jami can still
 -- see incomplete rows and prepare them before promotion to Hanna's queue.
 
 alter table public.opportunities add column if not exists ready_for_hanna boolean not null default false;
@@ -58,7 +58,7 @@ as $$
     from public.user_roles ur
     where ur.user_id = _user_id
       and (
-        ur.role in ('jami'::app_role, 'kirsi'::app_role)
+        ur.role = 'jami'::app_role
         or (ur.role = 'hanna'::app_role and coalesce(_ready, false))
       )
   )
