@@ -5,6 +5,7 @@ import PrepareHannaPage from './PrepareHannaPage'
 import TaskFirstRoot from './TaskFirstRoot'
 import { supabase, supabaseConfigured } from './lib/supabase'
 import './prepare-hanna.css'
+import './workspace-root.css'
 
 export default function WorkspaceRoot() {
   const location = useLocation()
