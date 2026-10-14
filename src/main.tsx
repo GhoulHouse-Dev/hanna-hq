@@ -1,13 +1,13 @@
 import React from 'react'
 import ReactDOM from 'react-dom/client'
 import { BrowserRouter } from 'react-router-dom'
-import TaskFirstRoot from './TaskFirstRoot'
+import WorkspaceRoot from './WorkspaceRoot'
 import './index.css'
 
 ReactDOM.createRoot(document.getElementById('root')!).render(
   <React.StrictMode>
     <BrowserRouter>
-      <TaskFirstRoot />
+      <WorkspaceRoot />
     </BrowserRouter>
   </React.StrictMode>,
 )
