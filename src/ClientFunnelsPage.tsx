@@ -441,7 +441,7 @@ export default function ClientFunnelsPage() {
                 <section className="funnel-options-editor">
                   <div className="funnel-section-head"><div><span className="cw-eyebrow">VAIHTOEHDOT</span><h3>Value + label</h3></div><button type="button" className="cw-secondary" onClick={() => setCurrentStepForm({ ...currentStepForm, options: [...currentStepForm.options, { value: '', label: '' }] })}><Plus size={15} /> Lisää vaihtoehto</button></div>
                   {currentStepForm.options.map((option, index) => (
-                    <div key={`${index}-${option.value}`} className="funnel-option-row">
+                    <div key={index} className="funnel-option-row">
                       <label>Value<input required pattern="[a-z0-9]+([_-][a-z0-9]+)*" maxLength={120} placeholder="detached_house" value={option.value} onChange={(event) => updateOption(index, 'value', event.target.value.toLowerCase().replace(/[^a-z0-9_-]/g, '_'))} /></label>
                       <label>Label<input required maxLength={160} placeholder="Omakotitalo" value={option.label} onChange={(event) => updateOption(index, 'label', event.target.value)} /></label>
                       <button type="button" className="cw-icon-button danger" title="Poista vaihtoehto" onClick={() => removeOption(index)}><Trash2 size={16} /></button>
