@@ -3,6 +3,7 @@ import { ClipboardCheck } from 'lucide-react'
 import { Link, useLocation } from 'react-router-dom'
 import ClientWorkspaceDetailPage from './ClientWorkspaceDetailPage'
 import ClientWorkspacesPage from './ClientWorkspacesPage'
+import InternalLoginPage from './InternalLoginPage'
 import PrepareHannaPage from './PrepareHannaPage'
 import SettingsPageV2 from './SettingsPageV2'
 import ShiftPlannerPage from './ShiftPlannerPage'
@@ -38,6 +39,7 @@ export default function WorkspaceRoot() {
     }
   }, [])
 
+  if (location.pathname === '/login') return <InternalLoginPage />
   if (location.pathname === '/prepare-hanna') return <PrepareHannaPage />
   if (location.pathname === '/shifts') return <ShiftPlannerPage />
   if (location.pathname === '/settings') return <SettingsPageV2 />
