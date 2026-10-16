@@ -6,7 +6,7 @@ on:
     branches: [main, feat/client-workspaces-v1]
 
 permissions:
-  contents: write
+  contents: read
 
 jobs:
   verify:
@@ -16,19 +16,10 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: 22
-      - run: npm install
+          cache: npm
+      - run: npm ci
       - name: Dependency audit
-        run: npm audit --json || true
-      - name: Commit generated npm lockfile on feature branch
-        if: github.event_name == 'push' && github.ref == 'refs/heads/feat/client-workspaces-v1'
-        run: |
-          if git status --porcelain package-lock.json | grep -q .; then
-            git config user.name "github-actions[bot]"
-            git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-            git add package-lock.json
-            git commit -m "chore: add npm lockfile"
-            git push
-          fi
+        run: npm audit --audit-level=high
       - run: npm run lint
       - run: npm run typecheck
       - run: npm test
