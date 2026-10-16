@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest'
-import { canCreateClientWorkspace, canEditClientWorkspace, isOrganizationRole } from './client-access.js'
+import { canCreateClientWorkspace, canEditClientWorkspace, canManageService, isOrganizationRole } from './client-access.js'
 
 describe('client workspace permissions', () => {
   it('allows only owner and admin to create client workspaces', () => {
@@ -14,6 +14,13 @@ describe('client workspace permissions', () => {
     expect(canEditClientWorkspace('ADMIN')).toBe(true)
     expect(canEditClientWorkspace('OPERATOR')).toBe(true)
     expect(canEditClientWorkspace('VIEWER')).toBe(false)
+  })
+
+  it('allows owner, admin and operator to manage services', () => {
+    expect(canManageService('OWNER')).toBe(true)
+    expect(canManageService('ADMIN')).toBe(true)
+    expect(canManageService('OPERATOR')).toBe(true)
+    expect(canManageService('VIEWER')).toBe(false)
   })
 
   it('rejects unknown organization roles', () => {
