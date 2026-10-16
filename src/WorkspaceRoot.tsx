@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react'
 import { ClipboardCheck } from 'lucide-react'
 import { Link, useLocation } from 'react-router-dom'
+import ClientFunnelsPage from './ClientFunnelsPage'
 import ClientServicesPage from './ClientServicesPage'
 import ClientWorkspaceDetailPage from './ClientWorkspaceDetailPage'
 import ClientWorkspacesPage from './ClientWorkspacesPage'
@@ -46,6 +47,7 @@ export default function WorkspaceRoot() {
   if (location.pathname === '/settings') return <SettingsPageV2 />
   if (location.pathname === '/clients') return <ClientWorkspacesPage />
   if (/^\/clients\/[^/]+\/services\/?$/.test(location.pathname)) return <ClientServicesPage />
+  if (/^\/clients\/[^/]+\/funnels(?:\/[^/]+)?\/?$/.test(location.pathname)) return <ClientFunnelsPage />
   if (location.pathname.startsWith('/clients/')) return <ClientWorkspaceDetailPage />
 
   return (
