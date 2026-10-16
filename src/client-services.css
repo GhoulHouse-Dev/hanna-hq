@@ -1,0 +1,150 @@
+.service-readonly {
+  margin: 14px 0 18px;
+}
+
+.service-list {
+  display: grid;
+  gap: 14px;
+}
+
+.service-card {
+  display: flex;
+  justify-content: space-between;
+  gap: 20px;
+  padding: 20px;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 16px;
+  background: rgba(255, 255, 255, 0.035);
+}
+
+.service-card-main {
+  min-width: 0;
+  flex: 1;
+}
+
+.service-card-title {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 16px;
+}
+
+.service-card h2 {
+  margin: 0;
+  font-size: 1.05rem;
+}
+
+.service-card code {
+  display: inline-block;
+  margin-top: 5px;
+  color: rgba(255, 255, 255, 0.55);
+  font-size: 0.78rem;
+}
+
+.service-card p {
+  margin: 12px 0 0;
+  max-width: 760px;
+  color: rgba(255, 255, 255, 0.72);
+  line-height: 1.55;
+}
+
+.service-status {
+  white-space: nowrap;
+  border-radius: 999px;
+  padding: 5px 9px;
+  font-size: 0.73rem;
+  font-weight: 700;
+  letter-spacing: 0.02em;
+}
+
+.service-active {
+  background: rgba(71, 202, 123, 0.12);
+  color: #8de0ad;
+}
+
+.service-inactive {
+  background: rgba(255, 255, 255, 0.08);
+  color: rgba(255, 255, 255, 0.62);
+}
+
+.service-actions {
+  display: flex;
+  align-items: flex-start;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.service-empty {
+  display: grid;
+  justify-items: start;
+  gap: 10px;
+  padding: 36px;
+  border: 1px dashed rgba(255, 255, 255, 0.16);
+  border-radius: 18px;
+  background: rgba(255, 255, 255, 0.025);
+}
+
+.service-empty h2,
+.service-empty p {
+  margin: 0;
+}
+
+.service-empty p {
+  color: rgba(255, 255, 255, 0.66);
+  max-width: 620px;
+  line-height: 1.55;
+}
+
+.service-form {
+  display: grid;
+  gap: 14px;
+}
+
+.service-form label {
+  display: grid;
+  gap: 7px;
+  font-size: 0.86rem;
+  font-weight: 700;
+}
+
+.service-form input,
+.service-form textarea {
+  width: 100%;
+  box-sizing: border-box;
+  border: 1px solid rgba(255, 255, 255, 0.14);
+  border-radius: 10px;
+  background: rgba(0, 0, 0, 0.2);
+  color: inherit;
+  padding: 11px 12px;
+  font: inherit;
+}
+
+.service-form textarea {
+  resize: vertical;
+}
+
+.service-slug-note {
+  margin: 14px 0 0;
+  color: rgba(255, 255, 255, 0.54);
+  font-size: 0.78rem;
+  line-height: 1.45;
+}
+
+.cw-workspace-nav .active {
+  color: #fff;
+  font-weight: 700;
+}
+
+@media (max-width: 760px) {
+  .service-card {
+    flex-direction: column;
+  }
+
+  .service-card-title {
+    align-items: flex-start;
+  }
+
+  .service-actions {
+    width: 100%;
+  }
+}
