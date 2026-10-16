@@ -8,6 +8,10 @@ export function canEditClientWorkspace(role) {
   return role === 'OWNER' || role === 'ADMIN' || role === 'OPERATOR'
 }
 
+export function canManageService(role) {
+  return role === 'OWNER' || role === 'ADMIN' || role === 'OPERATOR'
+}
+
 export function isOrganizationRole(role) {
   return ORGANIZATION_ROLES.includes(role)
 }
