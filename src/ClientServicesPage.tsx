@@ -147,7 +147,7 @@ export default function ClientServicesPage() {
               <Link to={`/clients/${client.id}`}>Yleiskuva</Link>
               <span className="active">Palvelut</span>
               <span className="disabled" title="Ei vielä toteutettu">Liidit</span>
-              <span className="disabled" title="Ei vielä toteutettu">Suppilot</span>
+              <Link to={`/clients/${client.id}/funnels`}>Suppilot</Link>
               <span className="disabled" title="Ei vielä toteutettu">Myyntiputki</span>
               <span className="disabled" title="Ei vielä toteutettu">Hinta-arviot</span>
               <span className="disabled" title="Ei vielä toteutettu">Tarjoukset</span>
