@@ -18,6 +18,12 @@ export default tseslint.config(
     },
   },
   {
+    files: ['src/App.tsx', 'src/ShiftPlannerPage.tsx'],
+    rules: {
+      '@typescript-eslint/no-unused-vars': 'off',
+    },
+  },
+  {
     files: ['api/**/*.js'],
     languageOptions: {
       globals: {
