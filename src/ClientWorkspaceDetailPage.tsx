@@ -1,6 +1,6 @@
 import { FormEvent, useEffect, useMemo, useState } from 'react'
 import { Archive, ArrowLeft, ExternalLink, PauseCircle, PlayCircle, Save, Settings2 } from 'lucide-react'
-import { Link, useParams } from 'react-router-dom'
+import { Link, useLocation } from 'react-router-dom'
 import ClientWorkspaceShell from './ClientWorkspaceShell'
 import {
   canEditClient,
@@ -13,8 +13,6 @@ import {
   workspaceStatusLabel,
 } from './lib/clientWorkspaces'
 import './client-workspaces.css'
-
-const sections = ['Yleiskuva', 'Liidit', 'Suppilot', 'Myyntiputki', 'Hinta-arviot', 'Tarjoukset', 'Automaatiot', 'Asetukset']
 
 function toForm(client: ClientWorkspace): ClientWorkspaceInput {
   return {
@@ -34,7 +32,8 @@ function toForm(client: ClientWorkspace): ClientWorkspaceInput {
 }
 
 export default function ClientWorkspaceDetailPage() {
-  const { id = '' } = useParams()
+  const location = useLocation()
+  const id = location.pathname.split('/')[2] || ''
   const [client, setClient] = useState<ClientWorkspace | null>(null)
   const [access, setAccess] = useState<OrganizationAccess | null>(null)
   const [form, setForm] = useState<ClientWorkspaceInput | null>(null)
@@ -112,12 +111,15 @@ export default function ClientWorkspaceDetailPage() {
             </header>
 
             <nav className="cw-workspace-nav" aria-label="Asiakastyötilan osiot">
-              {sections.map((section) => {
-                const enabled = section === 'Yleiskuva' || section === 'Asetukset'
-                return enabled
-                  ? <a key={section} href={section === 'Yleiskuva' ? '#overview' : '#settings'}>{section}</a>
-                  : <span key={section} className="disabled" title="Ei vielä toteutettu">{section}</span>
-              })}
+              <a href="#overview">Yleiskuva</a>
+              <Link to={`/clients/${client.id}/services`}>Palvelut</Link>
+              <span className="disabled" title="Ei vielä toteutettu">Liidit</span>
+              <span className="disabled" title="Ei vielä toteutettu">Suppilot</span>
+              <span className="disabled" title="Ei vielä toteutettu">Myyntiputki</span>
+              <span className="disabled" title="Ei vielä toteutettu">Hinta-arviot</span>
+              <span className="disabled" title="Ei vielä toteutettu">Tarjoukset</span>
+              <span className="disabled" title="Ei vielä toteutettu">Automaatiot</span>
+              <a href="#settings">Asetukset</a>
             </nav>
 
             <section id="overview" className="cw-overview-grid">
